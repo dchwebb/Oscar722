@@ -1,0 +1,2 @@
+gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	16	static
+osc.cpp:3:6:void Osc::setDrawBuffer(uint16_t*, uint16_t*)	24	static
