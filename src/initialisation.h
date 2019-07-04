@@ -14,9 +14,10 @@
 #define ADC_BUFFER_LENGTH 12
 
 extern volatile uint16_t ADC_array[];
-enum encoderType { HorizScaleCoarse, HorizScaleFine, CalibVertScale, CalibVertOffset, VoltScale, TriggerChannel, TriggerY, FFTAutoTune, FFTChannel };
+enum encoderType { HorizScaleCoarse, HorizScaleFine, CalibVertScale, CalibVertOffset, VoltScale, TriggerChannel, TriggerY, FFTAutoTune, FFTChannel, ChannelSelect };
 enum mode { Oscilloscope, Fourier, Waterfall, Circular, MIDI };
 enum oscChannel {channelA, channelB, channelC, channelNone};
+//enum oscDisplay {displayABC = 7, displayAB = 3, displayA = 1, displayB = 2, displayC = 4};		// Use binary picker for channel display
 
 //	Encoder state table
 #define DIR_CW 0x10

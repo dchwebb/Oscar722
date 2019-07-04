@@ -47,7 +47,7 @@ public:
 	bool menuMode = false;
 
 	std::vector<MenuItem> OscMenu{  { 0, "Horiz Coarse", HorizScaleCoarse },{ 1, "Horiz Fine", HorizScaleFine },{ 2, "Vert scale", VoltScale},{ 3, "Trigger Y", TriggerY},
-		{ 4, "Trigger Ch", TriggerChannel},{ 5, "Calib Scale", CalibVertScale },{ 5, "Calib Offset", CalibVertOffset } };
+		{ 4, "Trigger Ch", TriggerChannel},{ 5, "Calib Scale", CalibVertScale },{ 5, "Calib Offset", CalibVertOffset },{ 6, "Channel Sel", ChannelSelect } };
 	std::vector<MenuItem> FftMenu{  { 0, "Horiz Coarse", HorizScaleCoarse },{ 1, "Horiz Fine", HorizScaleFine },{ 2, "AutoTune", FFTAutoTune},{ 3, "Channel", FFTChannel} };
 
 

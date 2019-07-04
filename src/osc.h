@@ -21,5 +21,6 @@ public:
 
 	uint16_t* DrawBuffer[2];
 	uint8_t DrawBufferNumber = 0;
+	int8_t OscDisplay = 0b111;
 };
 

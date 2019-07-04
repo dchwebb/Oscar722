@@ -240,16 +240,19 @@ int main(void) {
 				// create draw buffer
 				std::pair<uint16_t, uint16_t> AY = std::minmax(pixelA, (uint16_t)prevPixelA);
 				std::pair<uint16_t, uint16_t> BY = std::minmax(pixelB, (uint16_t)prevPixelB);
+				std::pair<uint16_t, uint16_t> CY = std::minmax(pixelC, (uint16_t)prevPixelC);
 
 				uint8_t vOffset = (drawPos < 27 || drawPos > 250) ? 10 : 0;		// offset draw area so as not to overwrite voltage and freq labels
 				for (uint8_t h = 0; h <= DRAWHEIGHT - (drawPos < 27 ? 12 : 0); ++h) {
 
 					if (h < vOffset) {
 						// do not draw
-					} else if (h >= AY.first && h <= AY.second) {
+					} else if (osc.OscDisplay & 1 && h >= AY.first && h <= AY.second) {
 						osc.DrawBuffer[osc.DrawBufferNumber][h - vOffset] = LCD_GREEN;
-					} else if (h >= BY.first && h <= BY.second) {
+					} else if (osc.OscDisplay & 2 && h >= BY.first && h <= BY.second) {
 						osc.DrawBuffer[osc.DrawBufferNumber][h - vOffset] = LCD_LIGHTBLUE;
+					} else if (osc.OscDisplay & 4 && h >= CY.first && h <= CY.second) {
+						osc.DrawBuffer[osc.DrawBufferNumber][h - vOffset] = LCD_ORANGE;
 					} else if (drawPos % 4 == 0 && h == DRAWHEIGHT / 2) {
 						osc.DrawBuffer[osc.DrawBufferNumber][h - vOffset] = LCD_GREY;
 					} else {

@@ -79,6 +79,13 @@ void UI::EncoderAction(encoderType type, int8_t val) {
 			DrawUI();
 		}
 		break;
+	case ChannelSelect :
+		osc.OscDisplay += val;
+		osc.OscDisplay = osc.OscDisplay == 0 ? 7 : osc.OscDisplay == 8 ? 1 : osc.OscDisplay;
+		// FIXME - handle triggers
+		DrawUI();
+		break;
+
 	case TriggerChannel :
 		if ((osc.TriggerTest == nullptr && val > 0) || (osc.TriggerTest == &adcB && val < 0))
 			osc.TriggerTest = &adcA;
@@ -227,10 +234,12 @@ std::string UI::EncoderLabel(encoderType type) {
 		return "Zoom Horiz";
 	case HorizScaleFine :
 		return "Zoom Horiz";
+	case ChannelSelect :
+		return "Ch:" + std::string(osc.OscDisplay & 1 ? "A" : "") + std::string(osc.OscDisplay & 2 ? "B" : "") + std::string(osc.OscDisplay & 4 ? "C  " : "  ");
 	case CalibVertScale :
 		return "Calib Scale";
 	case CalibVertOffset :
-		return "Calib Offset";
+		return "Calib Offs";
 	case VoltScale :
 		return "Zoom Vert";
 	case TriggerY :

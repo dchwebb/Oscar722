@@ -1,2 +1,4 @@
-Debug/
-Drivers/
+*.o
+*.su
+Debug/*
+Drivers/*
