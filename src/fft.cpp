@@ -1,4 +1,5 @@
 #include <fft.h>
+//#define M_PI		3.14159265358979323846
 
 FFT::FFT() {
 	for (int s = 0; s < LUTSIZE; s++){

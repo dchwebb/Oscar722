@@ -57,7 +57,7 @@ void UI::EncoderAction(encoderType type, int8_t val) {
 	switch (type) {
 	case HorizScaleCoarse :
 		adj = TIM3->ARR + 10 * val;
-		if (adj > 0 && adj < 6000)
+		if (adj > 10 && adj < 6000)
 			TIM3->ARR = adj;
 		DrawUI();
 		break;
@@ -162,11 +162,17 @@ void UI::handleEncoders() {
 	// Change display mode
 	if (encoderBtnL) {
 		switch (displayMode) {
-		case Oscilloscope :	displayMode = Fourier;			break;
+		case Oscilloscope :
+			osc.SampleTimer = TIM3->ARR;
+			displayMode = Fourier;
+			break;
 		case Fourier :		displayMode = Waterfall;		break;
 		case Waterfall :	displayMode = Circular;			break;
 		case Circular :		displayMode = MIDI;				break;
-		case MIDI :			displayMode = Oscilloscope;		break;
+		case MIDI :
+			TIM3->ARR = osc.SampleTimer;
+			displayMode = Oscilloscope;
+			break;
 		}
 		ResetMode();
 	}

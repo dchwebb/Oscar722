@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stm32f4xx.h"
+#include "stm32f7xx.h"
 
 
 // Coverage profiler macros using timer 4 to count clock cycles / 10
@@ -48,3 +48,4 @@ void InitCoverageTimer();
 void InitDebounceTimer();
 void InitEncoders();
 void InitUART();
+void InitDAC();
