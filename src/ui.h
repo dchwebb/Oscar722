@@ -37,7 +37,7 @@ public:
 	void DrawUI();
 	void handleEncoders();
 	void MenuAction(encoderType* et, volatile const int8_t& val);
-	void EncoderAction(encoderType type, int8_t val);
+	void EncoderAction(encoderType type, const int8_t& val);
 	void ResetMode();
 	void DrawMenu();
 	std::string EncoderLabel(encoderType type);

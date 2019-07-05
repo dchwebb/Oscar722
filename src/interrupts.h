@@ -1,4 +1,3 @@
-
 // Main sample capture
 void TIM3_IRQHandler(void) {
 
@@ -120,52 +119,30 @@ void TIM3_IRQHandler(void) {
 // Left Encoder Button
 void EXTI2_IRQHandler(void) {
 
-	if (!(GPIOC->IDR & GPIO_IDR_IDR_2)) 						// Encoder button PC2 pressed
+	if (!(GPIOC->IDR & L_BTN_NO(GPIO_IDR_IDR_))) 				// Encoder button pressed - L_BTN_NO() adds number of encoder button eg GPIO_IDR_IDR_2
 		DB_ON													// Enable debounce timer
-	if (GPIOC->IDR & GPIO_IDR_IDR_2 && TIM5->CNT > 100) {		// Encoder button released - check enough time has elapsed to ensure not a bounce. A quick press if around 300, a long one around 8000+
+	if (GPIOC->IDR & L_BTN_NO(GPIO_IDR_IDR_) && TIM5->CNT > 100) {	// Encoder button released - check enough time has elapsed to ensure not a bounce. A quick press if around 300, a long one around 8000+
 		encoderBtnL = true;
 		DB_OFF													// Disable debounce timer
 	}
-	EXTI->PR |= EXTI_PR_PR2;									// Clear interrupt pending
+	EXTI->PR |= L_BTN_NO(EXTI_PR_PR);							// Clear interrupt pending
 }
 
-// Right Encoder
+// Right Encoder Button
 void EXTI9_5_IRQHandler(void) {
 
-	if (EXTI->PR & EXTI_PR_PR7) {
-		if (!(GPIOA->IDR & GPIO_IDR_IDR_7)) 					// Encoder button PA7 pressed
-			DB_ON												// Enable debounce timer
-		if (GPIOA->IDR & GPIO_IDR_IDR_7 && TIM5->CNT > 200) {	// Encoder button released - check enough time has elapsed to ensure not a bounce. A quick press if around 300, a long one around 8000+
-			encoderBtnR = true;
-			DB_OFF												// Disable debounce timer
-		}
-	} else {
-		// read encoder pins using state table to debounce
-		uint8_t pinState = (!(GPIOB->IDR & GPIO_IDR_IDR_8) << 1) | !(GPIOB->IDR & GPIO_IDR_IDR_9);		// Store position of each pin
-		encoderStateR = encTable[encoderStateR & 0xF][pinState];	// Determine new state from the pins and state table.
-		if (encoderStateR & 0x30) {
-			encoderPendingR = (encoderStateR & 0x30) == DIR_CW ? 1 : -1;
-		}
+	if (!(R_BTN_GPIO->IDR & R_BTN_NO(GPIO_IDR_IDR_))) 			// Encoder button pressed - R_BTN_NO() adds number of encoder button eg GPIO_IDR_IDR_7
+		DB_ON													// Enable debounce timer
+	if (R_BTN_GPIO->IDR & R_BTN_NO(GPIO_IDR_IDR_) && TIM5->CNT > 100) {	// Encoder button released - check enough time has elapsed to ensure not a bounce. A quick press if around 300, a long one around 8000+
+		encoderBtnR = true;
+		DB_OFF													// Disable debounce timer
 	}
-
-	EXTI->PR |= EXTI_PR_PR7 | EXTI_PR_PR8 | EXTI_PR_PR9;		// Clear interrupt pending
-}
-
-// Left Encoder
-void EXTI15_10_IRQHandler(void) {
-
-	uint8_t pinState = (!(GPIOC->IDR & GPIO_IDR_IDR_10) << 1) | !(GPIOC->IDR & GPIO_IDR_IDR_12);	// Store position of each pin
-	encoderStateL = encTable[encoderStateL & 0xF][pinState];	// Determine new state from the pins and state table.
-	if (encoderStateL & 0x30) {
-		encoderPendingL = (encoderStateL & 0x30) == DIR_CW ? 1 : -1;
-	}
-
-	EXTI->PR |= EXTI_PR_PR10 | EXTI_PR_PR12;					// Clear interrupt pending
+	EXTI->PR |= R_BTN_NO(EXTI_PR_PR);							// Clear interrupt pending
 }
 
 //	Coverage timer
-void TIM4_IRQHandler(void) {
-	TIM4->SR &= ~TIM_SR_UIF;									// clear UIF flag
+void TIM1_BRK_TIM9_IRQHandler(void) {
+	TIM9->SR &= ~TIM_SR_UIF;									// clear UIF flag
 	coverageTimer ++;
 }
 
@@ -177,7 +154,7 @@ void UART4_IRQHandler(void) {
 	}
 #else
 	if (UART4->ISR | USART_ISR_RXNE) {
-		midi.MIDIQueue.push(UART4->RDR);							// accessing DR automatically resets the receive flag
+		midi.MIDIQueue.push(UART4->RDR);						// accessing DR automatically resets the receive flag
 	}
 #endif
 }

@@ -207,15 +207,15 @@ void InitSampleAcquisition() {
 	TIM3->EGR |= TIM_EGR_UG;						//  Re-initializes counter and generates update of registers
 }
 
-//	Setup Timer 4 to count clock cycles for coverage profiling
+//	Setup Timer 9 to count clock cycles for coverage profiling
 void InitCoverageTimer() {
-	RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;				// Enable Timer
-	TIM4->PSC = 10;
-	TIM4->ARR = 65535;
+	RCC->APB2ENR |= RCC_APB2ENR_TIM9EN;				// Enable Timer
+	TIM9->PSC = 10;
+	TIM9->ARR = 65535;
 
-	TIM4->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
-	NVIC_EnableIRQ(TIM4_IRQn);
-	NVIC_SetPriority(TIM4_IRQn, 2);					// Lower is higher priority
+	TIM9->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
+	NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
+	NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 2);					// Lower is higher priority
 
 }
 
@@ -240,6 +240,51 @@ void InitEncoders() {
 	EXTI->FTSR |= EXTI_FTSR_TR2;					// Enable falling edge trigger
 	EXTI->IMR |= EXTI_IMR_MR2;						// Activate interrupt using mask register
 
+	// configure PA7 button to fire on an interrupt
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR7_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
+	SYSCFG->EXTICR[1] |= SYSCFG_EXTICR2_EXTI7_PA;	// Select Pin PA7 which uses External interrupt 2
+	EXTI->RTSR |= EXTI_RTSR_TR7;					// Enable rising edge trigger
+	EXTI->FTSR |= EXTI_FTSR_TR7;					// Enable falling edge trigger
+	EXTI->IMR |= EXTI_IMR_MR7;						// Activate interrupt using mask register
+
+
+	// L Encoder using timer functionality - PC6, PC7
+	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR6_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
+	GPIOC->MODER |= GPIO_MODER_MODER6_1;			// Set alternate function
+	GPIOC->AFR[0] |= 3 << 24;						// Alternate function 3 is TIM8_CH1 (Timer channels in Aleternate function documentation)
+
+	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR7_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
+	GPIOC->MODER |= GPIO_MODER_MODER7_1;			// Set alternate function
+	GPIOC->AFR[0] |= 3 << 28;						// Alternate function 3 is TIM8_CH2
+
+	RCC->APB2ENR |= RCC_APB2ENR_TIM8EN;				// Enable Timer 8
+	TIM8->PSC = 0;									// Set prescaler
+	TIM8->ARR = 0xFFFF; 							// Set auto reload register to max
+	TIM8->SMCR |= TIM_SMCR_SMS_0 |TIM_SMCR_SMS_1;	// SMS=011 for counting on both TI1 and TI2 edges
+	TIM8->SMCR |= TIM_SMCR_ETF;						// Enable digital filter 1111: fSAMPLING=fDTS/32, N=8
+	TIM8->CNT = 100;								// Start counter at mid way point
+	TIM8->CR1 |= TIM_CR1_CEN;
+
+	// R Encoder using timer functionality - PD12, PD13
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;			// reset and clock control - advanced high performance bus - GPIO port D
+
+	GPIOD->PUPDR |= GPIO_PUPDR_PUPDR12_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
+	GPIOD->MODER |= GPIO_MODER_MODER12_1;			// Set alternate function
+	GPIOD->AFR[1] |= 2 << 16;						// Alternate function 2 is TIM4_CH1
+
+	GPIOD->PUPDR |= GPIO_PUPDR_PUPDR13_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
+	GPIOD->MODER |= GPIO_MODER_MODER13_1;			// Set alternate function
+	GPIOD->AFR[1] |= 2 << 20;						// Alternate function 2 is TIM4_CH2
+
+	RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;				// Enable Timer 4
+	TIM4->PSC = 0;									// Set prescaler
+	TIM4->ARR = 0xFFFF; 							// Set auto reload register to max
+	TIM4->SMCR |= TIM_SMCR_SMS_0 |TIM_SMCR_SMS_1;	// SMS=011 for counting on both TI1 and TI2 edges
+	TIM4->SMCR |= TIM_SMCR_ETF;						// Enable digital filter
+	TIM4->CNT = 100;								// Start counter at mid way point
+	TIM4->CR1 |= TIM_CR1_CEN;
+
+/*
 	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR10_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
 	SYSCFG->EXTICR[2] |= SYSCFG_EXTICR3_EXTI10_PC;	// Select Pin PC10 which uses External interrupt 3
 	EXTI->RTSR |= EXTI_RTSR_TR10;					// Enable rising edge trigger
@@ -252,12 +297,6 @@ void InitEncoders() {
 	EXTI->FTSR |= EXTI_FTSR_TR12;					// Enable falling edge trigger
 	EXTI->IMR |= EXTI_IMR_MR12;						// Activate interrupt using mask register
 
-	// configure PA7 button to fire on an interrupt
-	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR7_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
-	SYSCFG->EXTICR[1] |= SYSCFG_EXTICR2_EXTI7_PA;	// Select Pin PA7 which uses External interrupt 2
-	EXTI->RTSR |= EXTI_RTSR_TR7;					// Enable rising edge trigger
-	EXTI->FTSR |= EXTI_FTSR_TR7;					// Enable falling edge trigger
-	EXTI->IMR |= EXTI_IMR_MR7;						// Activate interrupt using mask register
 
 	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR8_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
 	SYSCFG->EXTICR[2] |= SYSCFG_EXTICR3_EXTI8_PB;	// Select Pin PB8 which uses External interrupt 3
@@ -270,14 +309,17 @@ void InitEncoders() {
 	EXTI->RTSR |= EXTI_FTSR_TR9;					// Enable rising edge trigger
 	EXTI->FTSR |= EXTI_FTSR_TR9;					// Enable falling edge trigger
 	EXTI->IMR |= EXTI_IMR_MR9;						// Activate interrupt using mask register
+*/
 
 
 	NVIC_SetPriority(EXTI2_IRQn, 4);				// Lower is higher priority
 	NVIC_EnableIRQ(EXTI2_IRQn);
 	NVIC_SetPriority(EXTI9_5_IRQn, 4);				// Lower is higher priority
 	NVIC_EnableIRQ(EXTI9_5_IRQn);
+/*
 	NVIC_SetPriority(EXTI15_10_IRQn, 4);			// Lower is higher priority
 	NVIC_EnableIRQ(EXTI15_10_IRQn);
+*/
 }
 
 void InitUART() {
