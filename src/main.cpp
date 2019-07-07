@@ -86,11 +86,9 @@ int main(void) {
 	InitADC();
 	InitEncoders();
 	InitUART();
-	InitDAC();		// FIXME For testing
-
+//	InitDAC();		// FIXME For testing
 
 	lcd.Init();								// Initialize ILI9341 LCD
-
 
 /*
 	for (int p = 0; p < 50; ++p) {
@@ -99,7 +97,6 @@ int main(void) {
 		lcd.Delay(100000);
 	}
 */
-
 
 
 	InitSampleAcquisition();
@@ -270,9 +267,6 @@ int main(void) {
 				lcd.PatternFill(drawPos, vOffset, drawPos, DRAWHEIGHT - (drawPos < 27 ? 12 : 0), osc.DrawBuffer[osc.DrawBufferNumber]);
 				osc.DrawBufferNumber = osc.DrawBufferNumber == 0 ? 1 : 0;
 
-				// Draw current samples as lines from previous pixel position to current sample position
-				//lcd.DrawLine(drawPos, pixelC, drawPos, prevPixelC, LCD_ORANGE);
-
 				// Store previous sample so next sample can be drawn as a line from old to new
 				prevPixelA = pixelA;
 				prevPixelB = pixelB;
@@ -292,7 +286,6 @@ int main(void) {
 						lcd.DrawLine(std::max(osc.TriggerX - 4, 0), vo, osc.TriggerX + 4, vo, LCD_YELLOW);
 					}
 				}
-
 
 				if (drawPos == 1) {
 					// Write voltage

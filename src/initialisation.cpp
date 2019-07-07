@@ -233,7 +233,7 @@ void InitEncoders() {
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;			// reset and clock control - advanced high performance bus - GPIO port C
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;			// Enable system configuration clock: used to manage external interrupt line connection to GPIOs
 
-	// configure PC2 button and encoders PC10 and PC12 to fire on an interrupt
+	// configure PC2 button to fire on an interrupt
 	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR2_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
 	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI2_PC;	// Select Pin PC2 which uses External interrupt 2
 	EXTI->RTSR |= EXTI_RTSR_TR2;					// Enable rising edge trigger
