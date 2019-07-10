@@ -52,7 +52,7 @@ void SystemClock_Config(void) {
 
 	// Configure Flash prefetch, Instruction cache, Data cache and wait state
 #ifdef STM32F722xx
-	FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ARTEN | FLASH_ACR_LATENCY_7WS;		// need to increase to 7WS for maximum speed
+	FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ARTEN | FLASH_ACR_LATENCY_5WS;		// need to increase to 7WS for maximum speed
 #else
 	FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_LATENCY_5WS;
 #endif
@@ -215,7 +215,7 @@ void InitCoverageTimer() {
 
 	TIM9->DIER |= TIM_DIER_UIE;						// DMA/interrupt enable register
 	NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
-	NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 2);					// Lower is higher priority
+	NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 2);		// Lower is higher priority
 
 }
 
@@ -265,6 +265,8 @@ void InitEncoders() {
 	TIM8->CNT = 100;								// Start counter at mid way point
 	TIM8->CR1 |= TIM_CR1_CEN;
 
+
+#ifdef STM32F722xx
 	// R Encoder using timer functionality - PD12, PD13
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;			// reset and clock control - advanced high performance bus - GPIO port D
 
@@ -283,43 +285,32 @@ void InitEncoders() {
 	TIM4->SMCR |= TIM_SMCR_ETF;						// Enable digital filter
 	TIM4->CNT = 100;								// Start counter at mid way point
 	TIM4->CR1 |= TIM_CR1_CEN;
+#else
+	// R Encoder using timer functionality - PB6, PB7
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;			// reset and clock control - advanced high performance bus - GPIO port B
 
-/*
-	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR10_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
-	SYSCFG->EXTICR[2] |= SYSCFG_EXTICR3_EXTI10_PC;	// Select Pin PC10 which uses External interrupt 3
-	EXTI->RTSR |= EXTI_RTSR_TR10;					// Enable rising edge trigger
-	EXTI->FTSR |= EXTI_FTSR_TR10;					// Enable falling edge trigger
-	EXTI->IMR |= EXTI_IMR_MR10;						// Activate interrupt using mask register
+	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR6_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
+	GPIOB->MODER |= GPIO_MODER_MODER6_1;			// Set alternate function
+	GPIOB->AFR[0] |= 2 << 24;						// Alternate function 2 is TIM4_CH1
 
-	GPIOC->PUPDR |= GPIO_PUPDR_PUPDR12_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
-	SYSCFG->EXTICR[3] |= SYSCFG_EXTICR4_EXTI12_PC;	// Select Pin PC12 which uses External interrupt 4
-	EXTI->RTSR |= EXTI_RTSR_TR12;					// Enable rising edge trigger
-	EXTI->FTSR |= EXTI_FTSR_TR12;					// Enable falling edge trigger
-	EXTI->IMR |= EXTI_IMR_MR12;						// Activate interrupt using mask register
+	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR7_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
+	GPIOB->MODER |= GPIO_MODER_MODER7_1;			// Set alternate function
+	GPIOB->AFR[0] |= 2 << 28;						// Alternate function 2 is TIM4_CH2
 
+	RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;				// Enable Timer 4
+	TIM4->PSC = 0;									// Set prescaler
+	TIM4->ARR = 0xFFFF; 							// Set auto reload register to max
+	TIM4->SMCR |= TIM_SMCR_SMS_0 |TIM_SMCR_SMS_1;	// SMS=011 for counting on both TI1 and TI2 edges
+	TIM4->SMCR |= TIM_SMCR_ETF;						// Enable digital filter
+	TIM4->CNT = 100;								// Start counter at mid way point
+	TIM4->CR1 |= TIM_CR1_CEN;
 
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR8_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
-	SYSCFG->EXTICR[2] |= SYSCFG_EXTICR3_EXTI8_PB;	// Select Pin PB8 which uses External interrupt 3
-	EXTI->RTSR |= EXTI_FTSR_TR8;					// Enable rising edge trigger
-	EXTI->FTSR |= EXTI_FTSR_TR8;					// Enable falling edge trigger
-	EXTI->IMR |= EXTI_IMR_MR8;						// Activate interrupt using mask register
-
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR9_0;			// Set pin to pull up:  01 Pull-up; 10 Pull-down; 11 Reserved
-	SYSCFG->EXTICR[2] |= SYSCFG_EXTICR3_EXTI9_PB;	// Select Pin PB9 which uses External interrupt 3
-	EXTI->RTSR |= EXTI_FTSR_TR9;					// Enable rising edge trigger
-	EXTI->FTSR |= EXTI_FTSR_TR9;					// Enable falling edge trigger
-	EXTI->IMR |= EXTI_IMR_MR9;						// Activate interrupt using mask register
-*/
-
+#endif
 
 	NVIC_SetPriority(EXTI2_IRQn, 4);				// Lower is higher priority
 	NVIC_EnableIRQ(EXTI2_IRQn);
 	NVIC_SetPriority(EXTI9_5_IRQn, 4);				// Lower is higher priority
 	NVIC_EnableIRQ(EXTI9_5_IRQn);
-/*
-	NVIC_SetPriority(EXTI15_10_IRQn, 4);			// Lower is higher priority
-	NVIC_EnableIRQ(EXTI15_10_IRQn);
-*/
 }
 
 void InitUART() {

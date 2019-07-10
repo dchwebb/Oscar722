@@ -78,6 +78,7 @@ extern "C"
 int main(void) {
 
 	SystemInit();							// Activates floating point coprocessor and resets clock
+	//SCB_EnableICache();
 	SystemClock_Config();					// Configure the clock and PLL - NB Currently done in SystemInit but will need updating for production board
 	SystemCoreClockUpdate();				// Update SystemCoreClock (system clock frequency) derived from settings of oscillators, prescalers and PLL
 	InitCoverageTimer();					// Timer 4 only activated/deactivated when CP_ON/CP_CAP macros are used
@@ -261,8 +262,6 @@ int main(void) {
 						osc.DrawBuffer[osc.DrawBufferNumber][m * DRAWHEIGHT / (voltScale * 2)] = LCD_GREY;
 					}
 				}
-
-				debugCount = DMA1_Stream5->NDTR;
 
 				lcd.PatternFill(drawPos, vOffset, drawPos, DRAWHEIGHT - (drawPos < 27 ? 12 : 0), osc.DrawBuffer[osc.DrawBufferNumber]);
 				osc.DrawBufferNumber = osc.DrawBufferNumber == 0 ? 1 : 0;

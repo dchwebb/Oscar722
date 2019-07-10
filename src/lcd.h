@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stm32f7xx.h"
+#include "initialisation.h"
 #include "fontData.h"
 #include <vector>
 #include <string>
@@ -56,24 +57,11 @@
 #define ILI9341_INTERFACE			0xF6
 #define ILI9341_PRC					0xF7
 
-// Define macros for setting and clearing GPIO SPI pins
-#define LCD_RST_RESET	GPIOB->BSRR |= GPIO_BSRR_BR_0
-#define LCD_RST_SET 	GPIOB->BSRR |= GPIO_BSRR_BS_0
-#define LCD_DCX_RESET	GPIOC->BSRR |= GPIO_BSRR_BR_0
-#define LCD_DCX_SET		GPIOC->BSRR |= GPIO_BSRR_BS_0
-
-/*
-// Chip select - active low. Shouldn't need to do anything with this pin
-#define LCD_CS_RESET	GPIOC->BSRRH |= GPIO_BSRR_BS_2
-#define LCD_CS_SET		GPIOC->BSRRL |= GPIO_BSRR_BS_2
-*/
-
 // Macro for creating arguments to CommandData function
-#define CDARGS			std::vector<uint8_t>
+typedef std::vector<uint8_t> cdArgs_t;
 
 // Macros to check if DMA or SPI are busy - shouldn't need to check Stream5 as this is receive
-#define SPI_DMA_Working	DMA1_Stream5->NDTR || ((SPI3->SR & (SPI_SR_TXE | SPI_SR_RXNE)) == 0 || (SPI3->SR & SPI_SR_BSY))
-
+#define SPI_DMA_Working	LCD_DMA_STREAM->NDTR || ((LCD_SPI->SR & (SPI_SR_TXE | SPI_SR_RXNE)) == 0 || (LCD_SPI->SR & SPI_SR_BSY))
 
 enum LCD_Orientation_t { LCD_Portrait, LCD_Portrait_Flipped, LCD_Landscape, LCD_Landscape_Flipped } ;
 enum SPIDataSize_t { SPIDataSize_8b, SPIDataSize_16b };			// SPI in 8-bits mode/16-bits mode
@@ -118,7 +106,7 @@ private:
 
 	void Data(const uint8_t& data);
 	void Data16b(const uint16_t& data);
-	void CommandData(CDARGS);
+	void CommandData(cdArgs_t);
 	void SetCursorPosition(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 
 	inline void SPISendByte(const uint8_t data);
